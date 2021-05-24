@@ -1,0 +1,1 @@
+TOKEN = open("bot_token.txt", "r").read()
