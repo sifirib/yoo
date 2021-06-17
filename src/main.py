@@ -1,26 +1,26 @@
 import discord
+import time
 from discord import file
+from discord import channel
+from discord import message
+from discord import embeds
 from discord.ext import commands
-from discord.ext.commands.bot import Bot
-from discord.ext.commands.core import bot_has_role
 from utils.utils import *
 from youtubesearchpython import VideosSearch
-import time
 from Games.tiny_games import *
 from Games.Hangman import Hangman
-from Games.connect4.Game import Game, Board
-import os
-
+from Games.connect4.Game import Game
+from shared import *
 
 games = {}
 colors = {}
 
 intents = discord.Intents(messages=True, guilds=True, reactions=True, members=True, presences=True)
-bot = commands.Bot(command_prefix=".l ", intents=intents)
+bot = commands.Bot(command_prefix=".", intents=intents)
 
 # game = Game()
 game = Hangman()
-
+board_message_history = []
 
 @bot.event
 async def on_ready():
@@ -48,6 +48,7 @@ async def ping(ctx):
 
 @bot.command()
 @commands.has_permissions(administrator=True)
+# @commands.has_role(840869771356012555)
 async def clear(ctx, amount:int=1):
     await ctx.channel.purge(limit = amount + 1)
 
@@ -58,6 +59,7 @@ async def clear_error(ctx, error):
 
 
 @bot.command(aliases=["copy"])
+@commands.has_permissions(administrator=True)
 async def clone_channel(ctx, amount=1):
     print(ctx.channel)
     for i in range(amount):
@@ -86,8 +88,9 @@ async def ytplay(ctx, *args:str):
     base = "https://www.youtube.com/results?search_query="
     query = args
     search_url = base + '+'.join(query)
-
-    videos_search = VideosSearch(search_url, limit=1)
+    print(search_url)
+    videos_search = VideosSearch(search_url, limit=5)
+    print(videos_search.result())
     results = videos_search.result()["result"][0]
     url_of_music = results["link"]
     view_count = results["viewCount"]["short"]
@@ -100,32 +103,35 @@ async def ytplay(ctx, *args:str):
 
 
 
-@bot.command()
+@bot.command(aliases=["hm"])
 async def hangman(ctx, *args:str):
     # elif message.content.startswith('!hangman'):
     game_message = ""
     if args[0] == 'start':
         game.start_game()
-        game_message = 'A word has been randomly selected (all lowercase). \nGuess letters by using `!hangman x` (x is the guessed letter). \n'
+        game_message = 'A word has been randomly selected (all lowercase). \nGuess letters by using `.hangman x` (x is the guessed letter). \n'
     else:
         # print(dir(ctx.message))
         print(ctx.message.content)
         game.guess(ctx.message.content)
-    
-    await ctx.channel.send(game_message + game.get_game_status())
-
-
-
-
-
+    print(game.remaining_guesses)
+    await ctx.channel.send(game_message, embed=game.create_embed(hangman_body[game.remaining_guesses - 1]))
 
 
 
 # Connect 4
-
-
+@bot.command()
+async def test(ctx):
+    
+    message = await ctx.send('test')
+    # emoji = '\N{ONE SIGN}'
+    reactions = keycap_digits
+    for r in reactions:
+        await message.add_reaction(r)
+    
 @bot.command(aliases=["c4"])
 async def connect4(ctx, *args:str):
+
     # print(dir(ctx.message.content))
     message = ctx.message
     print(message.content)
@@ -170,8 +176,15 @@ async def connect4(ctx, *args:str):
         
         await ctx.send(file=discord.File(file_name))
 
+        # def check(reaction, user):
+        #     return user == ctx.author and str(reaction.emoji) in "a"
+
+        # reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
     
-    elif args[0] == "move":
+    elif (args[0] == "move"):
+        
+        # fetch_message = await ctx.channel.history(limit=2).find(lambda m: m.author.id == bot.user.id)
+
         column = message.content[-1]
         try:
             game_info = games[message.author.id]
@@ -180,7 +193,7 @@ async def connect4(ctx, *args:str):
             return
         if game_info['game'].turn == game_info['team']:
             if column.isdigit() and int(column) >= 0 and int(column) < 7:
-                winner = game_info['game'].move(int(column))
+                winner = game_info['game'].move(int(column ) - 1)
                 if winner == -1:
                     await ctx.channel.send("You must give a valid column " + message.author.mention)
                 
@@ -196,8 +209,9 @@ async def connect4(ctx, *args:str):
                         oc = colors.get(game_info['opponent'], "red")
                         game_info['game'].generateImageBoard(oc, pc).save(file_name, "PNG")
 
-                    await ctx.send(file=discord.File(file_name), content=message.author.mention + " won!")
-
+                    new_board = await ctx.send(file=discord.File(file_name), content=message.author.mention + " won!")
+                    for r in keycap_digits:
+                        await new_board.add_reaction(r)
                     opp_id = game_info['opponent'].id
 
                     del games[opp_id]
@@ -215,13 +229,82 @@ async def connect4(ctx, *args:str):
                         oc = colors.get(game_info['opponent'], "red")
                         game_info['game'].generateImageBoard(oc, pc).save(file_name, "PNG")
 
-                    await ctx.send(file=discord.File(file_name))
+                    new_board = await ctx.send(file=discord.File(file_name))
+                    for r in keycap_digits:
+                        await new_board.add_reaction(r)
+
             else:
                 await ctx.channel.send("You must give a valid column " + message.author.mention)
         else:
             await ctx.channel.send("It is not your turn " + message.author.mention)
 
 
+
+
+
+        fetch_message = await ctx.channel.history(limit=2).find(lambda m: m.author.id == bot.user.id)
+
+# @bot.event
+# async def on_reaction_add(reaction, user):
+#     # channel = reaction.message.channel
+#     print(reaction.users)
+#     print(dir(reaction.message))
+#     print(reaction.message.author)
+#     if reaction.message.author.id == bot.user.id:
+#         print("ahahaha")
+    
+
+#     try:
+#         game_info = games[message.author.id]
+#     except KeyError:
+#         await ctx.channel.send("You are not currently in a game " + message.author.mention)
+#         return
+
+#     if game_info['game'].turn == game_info['team']:
+
+#         if column.isdigit() and int(column) >= 0 and int(column) < 7:
+#             winner = game_info['game'].move(int(column ) - 1)
+#             if winner == -1:
+#                 await ctx.channel.send("You must give a valid column " + message.author.mention)
+            
+#             elif winner:
+#                 file_name = str(message.author.id) + ".png"
+                
+#                 if game_info["team"] == 0:
+#                     pc = colors.get(message.author, "red")
+#                     oc = colors.get(game_info['opponent'], "black")
+#                     game_info['game'].generateImageBoard(pc, oc).save(file_name, "PNG")
+#                 else:
+#                     pc = colors.get(message.author, "black")
+#                     oc = colors.get(game_info['opponent'], "red")
+#                     game_info['game'].generateImageBoard(oc, pc).save(file_name, "PNG")
+
+#                 new_board = await ctx.send(file=discord.File(file_name), content=message.author.mention + " won!")
+#                 for r in keycap_digits:
+#                     await new_board.add_reaction(r)
+#                 opp_id = game_info['opponent'].id
+
+#                 del games[opp_id]
+#                 del games[message.author.id]
+
+#             else:
+#                 file_name = str(message.author.id) + ".png"
+
+#                 if game_info["team"] == 0:
+#                     pc = colors.get(message.author, "red")
+#                     oc = colors.get(game_info['opponent'], "black")
+#                     game_info['game'].generateImageBoard(pc, oc).save(file_name, "PNG")
+#                 else:
+#                     pc = colors.get(message.author, "black")
+#                     oc = colors.get(game_info['opponent'], "red")
+#                     game_info['game'].generateImageBoard(oc, pc).save(file_name, "PNG")
+
+#                 new_board = await ctx.send(file=discord.File(file_name))
+#                 for r in keycap_digits:
+#                     await new_board.add_reaction(r)
+
+#         else:
+#             await ctx.channel.send("You must give a valid column " + message.author.mention)
 
 
 
