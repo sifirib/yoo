@@ -189,6 +189,7 @@ async def on_reaction_add(reaction, user):
     message = reaction.message
     channel = message.channel
     last_bot_msg = await channel.history(limit=1).find(lambda m: m.author.id == bot.user.id)
+    if not last_bot_msg: return
     print(last_bot_msg.content)
 
     if message.id != last_bot_msg.id: return
@@ -199,9 +200,7 @@ async def on_reaction_add(reaction, user):
         await channel.send("You are not currently in a game " + user.mention)
         await reaction.remove(user)
         return
-    # if game_info['game'].turn == game_info['team']:
-    #     if reaction.emoji in keycap_digits: return keycap_digits.index(reaction.emoji)
-    
+
        
     if game_info['game'].turn != game_info['team']:
         await reaction.remove(user)
@@ -215,46 +214,47 @@ async def on_reaction_add(reaction, user):
         if column.isdigit() and int(column) >= 0 and int(column) < 7:
             winner = game_info['game'].move(int(column))
             if winner == -1:
-                await channel.send("You must give a valid column " + message.author.mention)
+                await channel.send("You must give a valid column " + user.mention)
+                return
             
             elif winner:
-                file_name = str(message.author.id) + ".png"
+                file_name = str(user.id) + ".png"
                 
                 if game_info["team"] == 0:
-                    pc = colors.get(message.author, "red")
+                    pc = colors.get(user, "red")
                     oc = colors.get(game_info['opponent'], "black")
                     game_info['game'].generateImageBoard(pc, oc).save(file_name, "PNG")
                 else:
-                    pc = colors.get(message.author, "black")
+                    pc = colors.get(user, "black")
                     oc = colors.get(game_info['opponent'], "red")
                     game_info['game'].generateImageBoard(oc, pc).save(file_name, "PNG")
 
-                new_board = await channel.send(file=discord.File(file_name), content=message.author.mention + " won!")
+                new_board = await channel.send(file=discord.File(file_name), content=user.mention + " won!")
                 for r in keycap_digits:
                     await new_board.add_reaction(r)
                 opp_id = game_info['opponent'].id
 
                 del games[opp_id]
-                del games[message.author.id]
+                del games[user.id]
 
             else:
-                file_name = str(message.author.id) + ".png"
+                file_name = str(user.id) + ".png"
 
                 if game_info["team"] == 0:
-                    pc = colors.get(message.author, "red")
+                    pc = colors.get(user, "red")
                     oc = colors.get(game_info['opponent'], "black")
                     game_info['game'].generateImageBoard(pc, oc).save(file_name, "PNG")
                 else:
-                    pc = colors.get(message.author, "black")
+                    pc = colors.get(user, "black")
                     oc = colors.get(game_info['opponent'], "red")
                     game_info['game'].generateImageBoard(oc, pc).save(file_name, "PNG")
 
-                new_board = await channel.send("Your turn " + user.mention, file=discord.File(file_name))
+                new_board = await channel.send("Your turn " + game_info["opponent"].mention, file=discord.File(file_name))
                 for r in keycap_digits:
                     await new_board.add_reaction(r)
 
         else:
-            await channel.send("You must give a valid column " + message.author.mention)
+            await channel.send("You must give a valid column " + game_info["opponent"].mention)
 
 
 
