@@ -152,6 +152,7 @@ async def connect4(ctx, *args:str):
             game_info = games[message.author.id]
         except KeyError:
             await ctx.channel.send("You are not currently in a game " + message.author.mention)
+            return
 
         opp_id = game_info['opponent'].id
 
@@ -175,75 +176,9 @@ async def connect4(ctx, *args:str):
         
         game.generateImageBoard().save(file_name, "PNG")
         
-        new_board = await ctx.send(file=discord.File(file_name))
+        new_board = await ctx.send("Your turn " + player.mention, file=discord.File(file_name))
         for r in keycap_digits:
             await new_board.add_reaction(r)
-
-        # def check(reaction, user):
-        #     return user == ctx.author and str(reaction.emoji) in "a"
-
-        # reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
-    # column = await on_reaction_add(reaction, user)
-    # elif (args[0] in ["move", "mv"]):
-        
-    #     # fetch_message = await ctx.channel.history(limit=2).find(lambda m: m.author.id == bot.user.id)
-
-    #     column = message.content[-1]
-    #     try:
-    #         game_info = games[message.author.id]
-    #     except KeyError:
-    #         await ctx.channel.send("You are not currently in a game " + message.author.mention)
-    #         return
-    #     if game_info['game'].turn == game_info['team']:
-    #         if column.isdigit() and int(column) >= 0 and int(column) < 8:
-    #             winner = game_info['game'].move(int(column ) - 1)
-    #             if winner == -1:
-    #                 await ctx.channel.send("You must give a valid column " + message.author.mention)
-                
-    #             elif winner:
-    #                 file_name = str(message.author.id) + ".png"
-                    
-    #                 if game_info["team"] == 0:
-    #                     pc = colors.get(message.author, "red")
-    #                     oc = colors.get(game_info['opponent'], "black")
-    #                     game_info['game'].generateImageBoard(pc, oc).save(file_name, "PNG")
-    #                 else:
-    #                     pc = colors.get(message.author, "black")
-    #                     oc = colors.get(game_info['opponent'], "red")
-    #                     game_info['game'].generateImageBoard(oc, pc).save(file_name, "PNG")
-
-    #                 new_board = await ctx.send(file=discord.File(file_name), content=message.author.mention + " won!")
-    #                 for r in keycap_digits:
-    #                     await new_board.add_reaction(r)
-    #                 opp_id = game_info['opponent'].id
-
-    #                 del games[opp_id]
-    #                 del games[message.author.id]
-
-    #             else:
-    #                 file_name = str(message.author.id) + ".png"
-
-    #                 if game_info["team"] == 0:
-    #                     pc = colors.get(message.author, "red")
-    #                     oc = colors.get(game_info['opponent'], "black")
-    #                     game_info['game'].generateImageBoard(pc, oc).save(file_name, "PNG")
-    #                 else:
-    #                     pc = colors.get(message.author, "black")
-    #                     oc = colors.get(game_info['opponent'], "red")
-    #                     game_info['game'].generateImageBoard(oc, pc).save(file_name, "PNG")
-
-    #                 new_board = await ctx.send(file=discord.File(file_name))
-    #                 for r in keycap_digits:
-    #                     await new_board.add_reaction(r)
-
-    #         else:
-    #             await ctx.channel.send("You must give a valid column " + message.author.mention)
-    #     else:
-    #         await ctx.channel.send("It is not your turn " + message.author.mention)
-
-
-
-        # fetch_message = await ctx.channel.history(limit=2).find(lambda m: m.author.id == bot.user.id)
 
 
 
@@ -262,11 +197,16 @@ async def on_reaction_add(reaction, user):
         game_info = games[user.id]
     except KeyError:
         await channel.send("You are not currently in a game " + user.mention)
+        await reaction.remove(user)
         return
     # if game_info['game'].turn == game_info['team']:
     #     if reaction.emoji in keycap_digits: return keycap_digits.index(reaction.emoji)
-
-    if game_info['game'].turn == game_info['team']:
+    
+       
+    if game_info['game'].turn != game_info['team']:
+        await reaction.remove(user)
+        return
+    else:
         if reaction.emoji in keycap_digits:
             column = str(keycap_digits.index(reaction.emoji))
         else:
@@ -309,13 +249,12 @@ async def on_reaction_add(reaction, user):
                     oc = colors.get(game_info['opponent'], "red")
                     game_info['game'].generateImageBoard(oc, pc).save(file_name, "PNG")
 
-                new_board = await channel.send(file=discord.File(file_name))
+                new_board = await channel.send("Your turn " + user.mention, file=discord.File(file_name))
                 for r in keycap_digits:
                     await new_board.add_reaction(r)
 
         else:
             await channel.send("You must give a valid column " + message.author.mention)
-
 
 
 
