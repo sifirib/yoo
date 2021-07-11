@@ -1,12 +1,13 @@
 import random
 import discord
 from shared import words
-
+from User import User
 
 class Hangman(object):
     hangman_words = {i: words[i] for i in range(0, len(words))}
 
-    def start_game(self):
+    def start_game(self, user):
+        self.user = user
         self.chosen_word = ""
         self.guessed_letters = ""
         self.incorrect_letters = ["Incorrect letters: "]
@@ -15,42 +16,46 @@ class Hangman(object):
         self.has_won = False
         random.seed()
         key = random.randint(1, len(self.hangman_words))
-        self.chosen_word = self.hangman_words[key]
-        # for i in range(0, len(self.chosen_word)):
-        #     new_string += "_"
+        self.chosen_word = self.hangman_words[key].lower()
         self.guessed_letters = "_" * len(self.chosen_word)
+        self.contains_guess = False
 
     def get_game_status(self):
         # return a string containing the current game status and if
         # the player has won or not
         message = ""
-
+        print(User.coin(self.user))
         if not self.has_ended:
             # print each letter followed by a space
             letters = ""
             for i in range(0, len(self.guessed_letters)):
                 letters += self.guessed_letters[i] + ' '
             message = f'{self.remaining_guesses} guesses left \n`{letters}`'
-            # message += letters
 
         if self.has_ended and self.has_won:
-            message += '\n You won! You correctly guessed ' + f'`{self.chosen_word}`'
-        elif self.has_ended and not self.has_won:
-            message += '\n You lost! The correct word was ' + f'`{self.chosen_word}`'
+            coin = User.coin(self.user)
+            User.update_coin(self.user, coin + 10 * len(self.chosen_word))
+            message += '\n **__You won! You correctly guessed__** ' + f'`{self.chosen_word}`'
 
+        elif self.has_ended and not self.has_won:
+            coin = User.coin(self.user)
+            User.update_coin(self.user, coin - 10 * len(self.chosen_word))
+            message += '\n **__You lost! The correct word was__** ' + f'`{self.chosen_word}`'
+
+        message += f"\n`You have {User.coin(self.user)} coins..`"
         return message
     
     def guess(self, message):
         args = message.split(' ')
         guess = ""
-        contains_guess = False
+        self.contains_guess = False
 
         if len(args) > 1:
-            guess = args[1]
+            guess = args[1].lower()
         if len(guess) > 1:
             if guess == self.chosen_word:
                 self.guessed_letters = self.chosen_word
-                contains_guess = True
+                self.contains_guess = True
                 self.has_ended = True
                 self.has_won = True
             else:
@@ -60,8 +65,8 @@ class Hangman(object):
             for i in range(0, len(self.chosen_word)):
                 if guess[0] == self.chosen_word[i]:
                     self.guessed_letters = self.guessed_letters[:i] + guess[0] + self.guessed_letters[i + 1:]
-                    contains_guess = True
-            if not contains_guess and self.remaining_guesses > 0:
+                    self.contains_guess = True
+            if not self.contains_guess and self.remaining_guesses > 0:
                 self.remaining_guesses -= 1
                 if guess[0] not in self.incorrect_letters:
                     self.incorrect_letters.append(guess[0])
@@ -78,7 +83,7 @@ class Hangman(object):
                 self.has_won = True
 
             # no more guesses, so the player has lost
-            if self.remaining_guesses - 1 == 0:
+            if self.remaining_guesses == 0:
                 self.has_ended = True
                 self.has_won = False
 
@@ -86,12 +91,22 @@ class Hangman(object):
 
 
     def create_embed(self, description):
-
+        
         embed = discord.Embed(title="Hangman", url="https://github.com/sifirib/discord_bot", description=f"```{description}```")
         # embed.set_author(name="author name", url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwS70r6aZEg6-wofSf66x7MU7FiZSEFSOIQA&usqp=CAU", icon_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwS70r6aZEg6-wofSf66x7MU7FiZSEFSOIQA&usqp=CAU")
-        # embed.set_thumbnail(url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwS70r6aZEg6-wofSf66x7MU7FiZSEFSOIQA&usqp=CAU")
         embed.add_field(name=self.get_game_status(), value=", ".join(self.incorrect_letters), inline=True)
         # embed.add_field(name="fileld name2", value="field value2", inline=True)
         # embed.set_footer(text="footer text")
+        gif = ""
+        if self.has_ended:
+            if self.has_won:
+                gif = "https://media.tenor.com/images/2d126625a12ea0a819f3fd9d9bfee728/tenor.gif"
+            else:
+                gif = "https://media.tenor.com/images/b7c14f66c154f1e823b638eafd4b9cca/tenor.gif"
+        else:
+            gif = "https://media.tenor.com/images/d536a9d9cbf3b69a745b58e9b68f3cfb/tenor.gif"
+        embed.set_thumbnail(url=gif)
+
+            
 
         return embed
