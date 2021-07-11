@@ -1,11 +1,15 @@
+from os import sched_getaffinity
 import discord
 import time
+import asyncio
 from discord import file
 from discord import channel
 from discord import message
 from discord import embeds
 from discord import utils
 from discord.ext import commands
+from discord.gateway import DiscordWebSocket
+from User import User
 from utils.utils import *
 from youtubesearchpython import VideosSearch
 from Games.tiny_games import *
@@ -32,20 +36,105 @@ async def on_ready():
 @bot.event
 async def on_member_join(member):
     channel = discord.utils.get(member.guild.text_channels, name="gelen-giden")
-    await channel.send(f"Hos geldin {member} c:")
-    print(f"Hos geldin {member} c:")
+    User.add_new(member, 100, 3)
+    print(User.coin(member))
+    print(User.warn_ctr(member))
+    await channel.send(f"Hos geldin {member.mention} c:")
+    print(f"Hos geldin {member.mention} c:")
 
+@bot.event
+async def on_profanity(message, word):
+    warn_ctr = User.warn_ctr(message.author)
+    User.update_warn_ctr(message.author, warn_ctr + 1)
+    channel = message.channel
+    embed = discord.Embed(title="WARNING!", 
+    description=f"{message.author.name} just said ||{word}||\n You have been warned **{warn_ctr}** times.", color=discord.Color.blurple())
+    
+    if User.warn_ctr(message.author) >= 3:
+        duration = 10
+        unit = "s"
+        roleobject = discord.utils.get(message.guild.roles, id=863562272668385311)
+        await channel.send(f":white_check_mark: Muted {message.author} for {duration}{unit}")
+        await message.author.add_roles(roleobject)
+        # await channel.set_permissions(message.author, send_messages=False)
+        if unit == "s":
+            wait = 1 * duration
+            await asyncio.sleep(wait)
+        elif unit == "m":
+            wait = 60 * duration
+            await asyncio.sleep(wait)
+
+        await message.author.remove_roles(roleobject)
+        await channel.set_permissions(message.author, send_messages=True)
+        await channel.send(f":white_check_mark: {message.author} was unmuted") 
+
+
+
+    await channel.send(embed=embed)
+
+
+@bot.event
+async def on_member_update(before, after):
+    # text_channel_list = []
+    # for guild in bot.guilds:
+    #     for channel in guild.text_channels:
+    #         text_channel_list.append(channel)
+    # last_msg = None
+    # for channel in text_channel_list:
+    #     aux = await channel.history(limit=1).find(lambda m: m.author.id == after.user.id)
+    #     if aux.created_at > last_msg.created_at:
+    #         last_msg = aux
+
+    channel = discord.utils.get(after.guild.text_channels, name="bot")
+
+    for role in after.roles:
+        if role.name == "Muted":
+            await channel.set_permissions(after, send_messages=False)
+            return
+    await channel.set_permissions(after, send_messages=True)
+
+
+@bot.event
+async def on_message(message):
+    print(dir(message.created_at))
+    print(type(message.created_at))
+    print(message.created_at)
+
+
+    for i in badwords:
+        if i in message.content:
+            await message.delete()
+            await message.channel.send(f"{message.author.mention} Don't use that word!")
+            bot.dispatch("profanity", message, i)
+            return # So that it does not try to delete the message again, which will cause an error.
+
+        await bot.process_commands(message)
 
 # @bot.command(pass_context=True)
 # async def ping(ctx):
 #     await ctx.send(f'{round(bot.latency * 1000)} ms')
 @bot.command(pass_context=True)
 async def ping(ctx):
-        time_1 = time.perf_counter()
-        await ctx.trigger_typing()
-        time_2 = time.perf_counter()
-        ping = round((time_2-time_1) * 1000)
-        await ctx.send(f"{ping} ms")
+    time_1 = time.perf_counter()
+    await ctx.trigger_typing()
+    time_2 = time.perf_counter()
+    ping = round((time_2-time_1) * 1000)
+    await ctx.send(f"{ping} ms")
+
+@bot.command()
+@commands.has_permissions(kick_members=True)
+async def mute(ctx, user : discord.Member, duration = 0,*, unit = None):
+    roleobject = discord.utils.get(ctx.message.guild.roles, id=730016083871793163)
+    await ctx.send(f":white_check_mark: Muted {user} for {duration}{unit}")
+    await user.add_roles(roleobject)
+    if unit == "s":
+        wait = 1 * duration
+        await asyncio.sleep(wait)
+    elif unit == "m":
+        wait = 60 * duration
+        await asyncio.sleep(wait)
+    await user.remove_roles(roleobject)
+    await ctx.send(f":white_check_mark: {user} was unmuted") 
 
 @bot.command()
 @commands.has_permissions(administrator=True)
@@ -77,7 +166,7 @@ async def deneme(ctx, *args):
 
 
 @bot.command()
-async def av(ctx, *, avamember:discord.Member=None):
+async def av(ctx, *, avamember: discord.Member=None):
     user_avatar_url = avamember.avatar_url
 
     await ctx.send(user_avatar_url)
@@ -100,19 +189,22 @@ async def ytplay(ctx, *args:str):
 
     await ctx.send(f":globe_with_meridians: {view_count} :cyclone: {published_time}\n{url_of_music}")
     
-    
-
 
 
 @bot.command(aliases=["hm"])
 async def hangman(ctx, *args:str):
     # elif message.content.startswith('!hangman'):
     game_message = ""
-    if args[0] == 'start':  
-        game.start_game()
+    author = ctx.author
+    if args[0] == 'start':
+        # User.add_new(author)
+        print(author.id)
+        User.coin(author)
+        game.start_game(author)
         game_message = 'A word has been randomly selected (all lowercase). \nGuess letters by using `.hangman x` (x is the guessed letter). \n'
     else:
         # print(dir(ctx.message))
+        User.coin(author)
         print(ctx.message.content)
         game.guess(ctx.message.content)
     print(game.remaining_guesses)
@@ -121,15 +213,6 @@ async def hangman(ctx, *args:str):
 
 
 # Connect 4
-@bot.command()
-async def test(ctx):
-    
-    message = await ctx.send('test')
-    # emoji = '\N{ONE SIGN}'
-    reactions = keycap_digits
-    for r in reactions:
-        await message.add_reaction(r)
-    
 @bot.command(aliases=["c4"])
 async def connect4(ctx, *args:str):
 
@@ -216,7 +299,7 @@ async def on_reaction_add(reaction, user):
             if winner == -1:
                 await channel.send("You must give a valid column " + user.mention)
                 return
-            
+
             elif winner:
                 file_name = str(user.id) + ".png"
                 
