@@ -50,6 +50,8 @@ __________
 
 f = open("src/wordlist.txt", "r")
 words = [line.strip() for line in f.readlines()]
+f = open("src/badwords.txt", "r")
+badwords = [line.strip() for line in f.readlines()]
 
 def check_reaction(ctx, reaction, user):
     return user == ctx.author and str(reaction.emoji) in keycap_digits
