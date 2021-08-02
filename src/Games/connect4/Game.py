@@ -1,4 +1,4 @@
-from connect4.Board import Board, Piece
+from Games.connect4.Board import Board, Piece
 from PIL import Image, ImageDraw
 
 from io import BytesIO

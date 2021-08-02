@@ -1,7 +1,8 @@
 import os
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_DIR = os.path.join(ROOT_DIR, "databases/", "deneme.db")
-CFG_DIR = os.path.join(ROOT_DIR, "utils/", "config.json")
+
+# CFG_DIR = os.path.join(ROOT_DIR, "utils/", "config.json")
 
 keycap_digits = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣"]
 hangman_body = ["""

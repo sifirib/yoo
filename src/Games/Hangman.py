@@ -89,7 +89,7 @@ class Hangman(object):
 
 
 
-
+    
     def create_embed(self, description):
         
         embed = discord.Embed(title="Hangman", url="https://github.com/sifirib/discord_bot", description=f"```{description}```")

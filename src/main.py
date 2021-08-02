@@ -357,5 +357,6 @@ async def on_reaction_add(reaction, user):
 
 
 
-bot.run(DATA["token"])
+if __name__ == "__main__":
+    bot.run(TOKEN)
 
