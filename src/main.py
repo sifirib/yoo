@@ -65,7 +65,7 @@ async def on_profanity(message, word):
             await asyncio.sleep(wait)
 
         await message.author.remove_roles(roleobject)
-        await channel.set_permissions(message.author, send_messages=True)
+        # await channel.set_permissions(message.author, send_messages=True)
         await channel.send(f":white_check_mark: {message.author} was unmuted") 
 
 
@@ -73,32 +73,42 @@ async def on_profanity(message, word):
     await channel.send(embed=embed)
 
 
-@bot.event
-async def on_member_update(before, after):
-    # text_channel_list = []
-    # for guild in bot.guilds:
-    #     for channel in guild.text_channels:
-    #         text_channel_list.append(channel)
-    # last_msg = None
-    # for channel in text_channel_list:
-    #     aux = await channel.history(limit=1).find(lambda m: m.author.id == after.user.id)
-    #     if aux.created_at > last_msg.created_at:
-    #         last_msg = aux
+# @bot.event
+# async def on_member_update(before, after):
+#     # text_channel_list = []
+#     # for guild in bot.guilds:
+#     #     for channel in guild.text_channels:
+#     #         text_channel_list.append(channel)
+#     # last_msg = None
+#     # for channel in text_channel_list:
+#     #     aux = await channel.history(limit=1).find(lambda m: m.author.id == after.user.id)
+#     #     if aux.created_at > last_msg.created_at:
+#     #         last_msg = aux
 
-    channel = discord.utils.get(after.guild.text_channels, name="bot")
 
-    for role in after.roles:
-        if role.name == "Muted":
-            await channel.set_permissions(after, send_messages=False)
-            return
-    await channel.set_permissions(after, send_messages=True)
+#     # channel = discord.utils.get(after.guild.text_channels, name="bot")
+#     text_channel_list = []
+#     for guild in bot.guilds:
+#         for channel in guild.text_channels:
+#             text_channel_list.append(channel)
+#     for channel in text_channel_list:
+#         for role in after.roles:
+#             if role.name == "Muted":
+#                 await channel.set_permissions(after, send_messages=False)
+#                 return
+#         await channel.set_permissions(after, send_messages=True)
 
 
 @bot.event
 async def on_message(message):
-    print(dir(message.created_at))
-    print(type(message.created_at))
-    print(message.created_at)
+    # last_message = await message.author.history(limit=1).flatten()[0]
+    # history = await message.author.history(limit=1)
+    # history_listesi = await history.flatten()
+    # last_message = history_listesi[0]
+    # print(last_message)
+    # print(dir(message.author.history))
+    # print(type(message.created_at))
+    # print(message.author.history)
 
 
     for i in badwords:
@@ -109,6 +119,11 @@ async def on_message(message):
             return # So that it does not try to delete the message again, which will cause an error.
 
         await bot.process_commands(message)
+
+
+
+
+
 
 # @bot.command(pass_context=True)
 # async def ping(ctx):
@@ -146,7 +161,6 @@ async def clear(ctx, amount:int=1):
 async def clear_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("You do not have the permission to do that!")
-
 
 @bot.command(aliases=["copy"])
 @commands.has_permissions(administrator=True)
@@ -209,7 +223,6 @@ async def hangman(ctx, *args:str):
         game.guess(ctx.message.content)
     print(game.remaining_guesses)
     await ctx.channel.send(game_message, embed=game.create_embed(hangman_body[game.remaining_guesses - 1]))
-
 
 
 # Connect 4
@@ -344,5 +357,5 @@ async def on_reaction_add(reaction, user):
 
 
 
-bot.run(TOKEN)
+bot.run(DATA["token"])
 

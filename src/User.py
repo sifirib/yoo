@@ -1,10 +1,7 @@
 import sqlite3
-import os
+from shared import DB_DIR
+path = DB_DIR
 
-cwd = os.getcwd()
-print(cwd)
-path = cwd + "/databases/deneme.py"
-path = "/home/hrx/Desktop/projects/python/discord/yoo/src/databases/deneme.db"
 
 class User:
     
