@@ -3,3 +3,4 @@ evdev==1.4.0
 youtube-dl==2021.5.16
 youtube-search-python==1.4.5
 python-dotenv
+Pillow
