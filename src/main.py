@@ -99,28 +99,26 @@ async def on_profanity(message, word):
 #         await channel.set_permissions(after, send_messages=True)
 
 
-@bot.event
-async def on_message(message):
-    # last_message = await message.author.history(limit=1).flatten()[0]
-    # history = await message.author.history(limit=1)
-    # history_listesi = await history.flatten()
-    # last_message = history_listesi[0]
-    # print(last_message)
-    # print(dir(message.author.history))
-    # print(type(message.created_at))
-    # print(message.author.history)
+# @bot.event
+# async def on_message(message):
+#     # last_message = await message.author.history(limit=1).flatten()[0]
+#     # history = await message.author.history(limit=1)
+#     # history_listesi = await history.flatten()
+#     # last_message = history_listesi[0]
+#     # print(last_message)
+#     # print(dir(message.author.history))
+#     # print(type(message.created_at))
+#     # print(message.author.history)
 
 
-    for i in badwords:
-        if i in message.content:
-            await message.delete()
-            await message.channel.send(f"{message.author.mention} Don't use that word!")
-            bot.dispatch("profanity", message, i)
-            return # So that it does not try to delete the message again, which will cause an error.
+#     for i in badwords:
+#         if i in message.content:
+#             await message.delete()
+#             await message.channel.send(f"{message.author.mention} Don't use that word!")
+#             bot.dispatch("profanity", message, i)
+#             return # So that it does not try to delete the message again, which will cause an error.
 
-        await bot.process_commands(message)
-
-
+#         await bot.process_commands(message)
 
 
 
