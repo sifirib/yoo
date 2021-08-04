@@ -15,6 +15,7 @@ from youtubesearchpython import VideosSearch
 from Games.tiny_games import *
 from Games.Hangman import Hangman
 from Games.connect4.Game import Game
+from Bump import Bump
 from shared import *
 
 games = {}
@@ -25,6 +26,7 @@ bot = commands.Bot(command_prefix=".", intents=intents)
 
 # game = Game()
 game = Hangman()
+bump = Bump(bot, 841701695628247080)
 board_message_history = []
 
 @bot.event
@@ -33,6 +35,9 @@ async def on_ready():
     print("Ready!")
     print("------")
 
+    while bump.active == True:
+        command = await bump.bump_()
+        # await self.clean(command)
 @bot.event
 async def on_member_join(member):
     channel = discord.utils.get(member.guild.text_channels, name="gelen-giden")
@@ -42,35 +47,36 @@ async def on_member_join(member):
     await channel.send(f"Hos geldin {member.mention} c:")
     print(f"Hos geldin {member.mention} c:")
 
-@bot.event
-async def on_profanity(message, word):
-    warn_ctr = User.warn_ctr(message.author)
-    User.update_warn_ctr(message.author, warn_ctr + 1)
-    channel = message.channel
-    embed = discord.Embed(title="WARNING!", 
-    description=f"{message.author.name} just said ||{word}||\n You have been warned **{warn_ctr}** times.", color=discord.Color.blurple())
+
+# @bot.event
+# async def on_profanity(message, word):
+#     warn_ctr = User.warn_ctr(message.author)
+#     User.update_warn_ctr(message.author, warn_ctr + 1)
+#     channel = message.channel
+#     embed = discord.Embed(title="WARNING!", 
+#     description=f"{message.author.name} just said ||{word}||\n You have been warned **{warn_ctr}** times.", color=discord.Color.blurple())
     
-    if User.warn_ctr(message.author) >= 3:
-        duration = 10
-        unit = "s"
-        roleobject = discord.utils.get(message.guild.roles, id=863562272668385311)
-        await channel.send(f":white_check_mark: Muted {message.author} for {duration}{unit}")
-        await message.author.add_roles(roleobject)
-        # await channel.set_permissions(message.author, send_messages=False)
-        if unit == "s":
-            wait = 1 * duration
-            await asyncio.sleep(wait)
-        elif unit == "m":
-            wait = 60 * duration
-            await asyncio.sleep(wait)
+#     if User.warn_ctr(message.author) >= 3:
+#         duration = 10
+#         unit = "s"
+#         roleobject = discord.utils.get(message.guild.roles, id=863562272668385311)
+#         await channel.send(f":white_check_mark: Muted {message.author} for {duration}{unit}")
+#         await message.author.add_roles(roleobject)
+#         # await channel.set_permissions(message.author, send_messages=False)
+#         if unit == "s":
+#             wait = 1 * duration
+#             await asyncio.sleep(wait)
+#         elif unit == "m":
+#             wait = 60 * duration
+#             await asyncio.sleep(wait)
 
-        await message.author.remove_roles(roleobject)
-        # await channel.set_permissions(message.author, send_messages=True)
-        await channel.send(f":white_check_mark: {message.author} was unmuted") 
+#         await message.author.remove_roles(roleobject)
+#         # await channel.set_permissions(message.author, send_messages=True)
+#         await channel.send(f":white_check_mark: {message.author} was unmuted") 
 
 
 
-    await channel.send(embed=embed)
+#     await channel.send(embed=embed)
 
 
 # @bot.event
@@ -99,8 +105,8 @@ async def on_profanity(message, word):
 #         await channel.set_permissions(after, send_messages=True)
 
 
-# @bot.event
-# async def on_message(message):
+@bot.event
+async def on_message(message):
 #     # last_message = await message.author.history(limit=1).flatten()[0]
 #     # history = await message.author.history(limit=1)
 #     # history_listesi = await history.flatten()
@@ -119,6 +125,19 @@ async def on_profanity(message, word):
 #             return # So that it does not try to delete the message again, which will cause an error.
 
 #         await bot.process_commands(message)
+
+
+    if message.member.hasPermission("ADMINISTRATOR"):
+        if message.content == "!pause":
+            await bump.pause_()
+            await bump.channel.send(message, "Bot is paused :sleeping:")
+
+        elif message.content == "!continue":
+            await bump.continue_()
+            await bump.channel.send(
+                message,
+                f"Bump is activated, next bump in {bump.diff} seconds :hourglass_flowing_sand:",
+            )
 
 
 
@@ -294,8 +313,8 @@ async def on_reaction_add(reaction, user):
         await channel.send("You are not currently in a game " + user.mention)
         await reaction.remove(user)
         return
-
-       
+    
+    
     if game_info['game'].turn != game_info['team']:
         await reaction.remove(user)
         return
@@ -349,7 +368,6 @@ async def on_reaction_add(reaction, user):
 
         else:
             await channel.send("You must give a valid column " + game_info["opponent"].mention)
-
 
 
 
