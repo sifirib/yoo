@@ -1,15 +1,13 @@
-import asyncio
-from typing import AsyncIterable
-import discord, datetime
+import datetime
 from asyncio import sleep
-
-from discord import channel
 
 class Bump():
     active = True
 
-    def __init__(self, channel_id):
-        self.channel = self.get_channel(channel_id)
+    def __init__(self, bot, channel_id):
+        self.bot = bot
+        self.channel = self.bot.get_channel(channel_id)
+
 
     async def pause_(self):
         self.active = False
@@ -42,5 +40,5 @@ class Bump():
 
         return command
 
-    
+
     
