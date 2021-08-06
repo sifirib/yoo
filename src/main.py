@@ -9,7 +9,7 @@ from youtubesearchpython import VideosSearch
 from Games.tiny_games import *
 from Games.Hangman import Hangman
 from Games.connect4.Game import Game
-from Bump import Bump
+# from Bump import Bump
 from shared import *
 
 games = {}
@@ -20,7 +20,7 @@ bot = commands.Bot(command_prefix=".", intents=intents)
 
 # game = Game()
 game = Hangman()
-bump = Bump(bot, 841701695628247080)
+# bump = Bump(bot, 841701695628247080)
 board_message_history = []
 
 @bot.event
@@ -29,9 +29,9 @@ async def on_ready():
     print("Ready!")
     print("------")
 
-    while bump.active == True:
-        command = await bump.bump_()
-        # await self.clean(command)
+    # while bump.active == True:
+    #     command = await bump.bump_()
+    #     # await self.clean(command)
 @bot.event
 async def on_member_join(member):
     channel = discord.utils.get(member.guild.text_channels, name="gelen-giden")
@@ -365,7 +365,8 @@ async def on_reaction_add(reaction, user):
             await channel.send("You must give a valid column " + game_info["opponent"].mention)
 
 
-
+@bot.command
+async def yay(ctx): await ctx.send("https://media.tenor.com/images/ce438e1b83f3d8d4efd1dc78be715647/tenor.gif")
 
 
 if __name__ == "__main__":
