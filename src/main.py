@@ -1,14 +1,8 @@
-from os import sched_getaffinity
 import discord
 import time
 import asyncio
 from discord import file
-from discord import channel
-from discord import message
-from discord import embeds
-from discord import utils
 from discord.ext import commands
-from discord.gateway import DiscordWebSocket
 from User import User
 from utils.utils import *
 from youtubesearchpython import VideosSearch
@@ -105,8 +99,9 @@ async def on_member_join(member):
 #         await channel.set_permissions(after, send_messages=True)
 
 
-@bot.event
-async def on_message(message):
+# @bot.event
+# async def on_message(message):
+    
 #     # last_message = await message.author.history(limit=1).flatten()[0]
 #     # history = await message.author.history(limit=1)
 #     # history_listesi = await history.flatten()
@@ -126,18 +121,18 @@ async def on_message(message):
 
 #         await bot.process_commands(message)
 
+    
+    # if message.author.guild_permissions.administrator:
+    #     if message.content == "!pause":
+    #         await bump.pause_()
+    #         await bump.channel.send(message, "Bot is paused :sleeping:")
 
-    if message.member.hasPermission("ADMINISTRATOR"):
-        if message.content == "!pause":
-            await bump.pause_()
-            await bump.channel.send(message, "Bot is paused :sleeping:")
-
-        elif message.content == "!continue":
-            await bump.continue_()
-            await bump.channel.send(
-                message,
-                f"Bump is activated, next bump in {bump.diff} seconds :hourglass_flowing_sand:",
-            )
+    #     elif message.content == "!continue":
+    #         await bump.continue_()
+    #         await bump.channel.send(
+    #             message,
+    #             f"Bump is activated, next bump in {bump.diff} seconds :hourglass_flowing_sand:",
+    #         )
 
 
 
