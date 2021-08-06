@@ -365,7 +365,7 @@ async def on_reaction_add(reaction, user):
             await channel.send("You must give a valid column " + game_info["opponent"].mention)
 
 
-@bot.command
+@bot.command()
 async def yay(ctx): await ctx.send("https://media.tenor.com/images/ce438e1b83f3d8d4efd1dc78be715647/tenor.gif")
 
 
