@@ -367,6 +367,14 @@ async def on_reaction_add(reaction, user):
 
 @bot.command()
 async def yay(ctx): await ctx.send("https://media.tenor.com/images/ce438e1b83f3d8d4efd1dc78be715647/tenor.gif")
+@bot.command()
+async def escape(ctx): await ctx.send("https://media.tenor.com/images/a5039fe1e33f14e937d698fbbd4c5a89/tenor.gif")
+@bot.command()
+async def scream(ctx): await ctx.send("https://media.tenor.com/images/7ddaf2163f56b74ec091e71393043763/tenor.gif")
+@bot.command()
+async def cry(ctx): await ctx.send("https://media.tenor.com/images/46e57b8c81513867e00085b2ea5a3b0c/tenor.gif")
+@bot.command()
+async def uuu(ctx): await ctx.send("https://media.tenor.com/images/c5ffdb8f1ee081ef95e0366b4a1d489e/tenor.gif")
 
 
 if __name__ == "__main__":
