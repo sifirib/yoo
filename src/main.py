@@ -3,7 +3,7 @@ import time
 import asyncio
 from discord import file
 from discord.ext import commands
-from User import User
+# from User import User
 from utils.utils import *
 from youtubesearchpython import VideosSearch
 from Games.tiny_games import *
@@ -35,9 +35,9 @@ async def on_ready():
 @bot.event
 async def on_member_join(member):
     channel = discord.utils.get(member.guild.text_channels, name="gelen-giden")
-    User.add_new(member, 100, 3)
-    print(User.coin(member))
-    print(User.warn_ctr(member))
+    # User.add_new(member, 100, 3)
+    # print(User.coin(member))
+    # print(User.warn_ctr(member))
     await channel.send(f"Hos geldin {member.mention} c:")
     print(f"Hos geldin {member.mention} c:")
 
@@ -225,12 +225,12 @@ async def hangman(ctx, *args:str):
     if args[0] == 'start':
         # User.add_new(author)
         print(author.id)
-        User.coin(author)
+        # User.coin(author)
         game.start_game(author)
         game_message = 'A word has been randomly selected (all lowercase). \nGuess letters by using `.hangman x` (x is the guessed letter). \n'
     else:
         # print(dir(ctx.message))
-        User.coin(author)
+        # User.coin(author)
         print(ctx.message.content)
         game.guess(ctx.message.content)
     print(game.remaining_guesses)
@@ -296,7 +296,7 @@ async def on_reaction_add(reaction, user):
 
     message = reaction.message
     channel = message.channel
-    last_bot_msg = await channel.history(limit=1).find(lambda m: m.author.id == bot.user.id)
+    last_bot_msg = await channel.history(limit=50).find(lambda m: m.author.id == bot.user.id)
     if not last_bot_msg: return
     print(last_bot_msg.content)
 

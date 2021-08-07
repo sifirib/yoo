@@ -1,7 +1,7 @@
 import random
 import discord
 from shared import words
-from User import User
+# from User import User
 
 class Hangman(object):
     hangman_words = {i: words[i] for i in range(0, len(words))}
@@ -24,7 +24,7 @@ class Hangman(object):
         # return a string containing the current game status and if
         # the player has won or not
         message = ""
-        print(User.coin(self.user))
+        # print(User.coin(self.user))
         if not self.has_ended:
             # print each letter followed by a space
             letters = ""
@@ -33,16 +33,16 @@ class Hangman(object):
             message = f'{self.remaining_guesses} guesses left \n`{letters}`'
 
         if self.has_ended and self.has_won:
-            coin = User.coin(self.user)
-            User.update_coin(self.user, coin + 10 * len(self.chosen_word))
+            # coin = User.coin(self.user)
+            # User.update_coin(self.user, coin + 10 * len(self.chosen_word))
             message += '\n **__You won! You correctly guessed__** ' + f'`{self.chosen_word}`'
 
         elif self.has_ended and not self.has_won:
-            coin = User.coin(self.user)
-            User.update_coin(self.user, coin - 10 * len(self.chosen_word))
+            # coin = User.coin(self.user)
+            # User.update_coin(self.user, coin - 10 * len(self.chosen_word))
             message += '\n **__You lost! The correct word was__** ' + f'`{self.chosen_word}`'
 
-        message += f"\n`You have {User.coin(self.user)} coins..`"
+        # message += f"\n`You have {User.coin(self.user)} coins..`"
         return message
     
     def guess(self, message):
