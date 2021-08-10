@@ -11,7 +11,7 @@ class User:
         sql = f"""SELECT ID FROM users WHERE ID = '{str(user.id)}'"""
         c = conn.cursor()
         c.execute(sql)
-        if c.fetchone():
+        if c.fetchone(): 
             return "Already existed user!"
         sql = f"""INSERT INTO users(ID, coin, warn_ctr)
         VALUES ({str(user.id)}, '{coin}', '{warn_ctr}');"""

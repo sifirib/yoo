@@ -1,16 +1,17 @@
+from datetime import date
+from random import random, randint
 import discord
 import time
 import asyncio
 from discord import file
 from discord.ext import commands
-# from User import User
 from utils.utils import *
 from youtubesearchpython import VideosSearch
 from Games.tiny_games import *
 from Games.Hangman import Hangman
 from Games.connect4.Game import Game
-# from Bump import Bump
 from shared import *
+from databases.model import *
 
 games = {}
 colors = {}
@@ -20,8 +21,6 @@ bot = commands.Bot(command_prefix=".", intents=intents)
 
 # game = Game()
 game = Hangman()
-# bump = Bump(bot, 841701695628247080)
-board_message_history = []
 
 @bot.event
 async def on_ready():
@@ -29,18 +28,62 @@ async def on_ready():
     print("Ready!")
     print("------")
 
-    # while bump.active == True:
-    #     command = await bump.bump_()
-    #     # await self.clean(command)
+
 @bot.event
 async def on_member_join(member):
-    channel = discord.utils.get(member.guild.text_channels, name="gelen-giden")
-    # User.add_new(member, 100, 3)
-    # print(User.coin(member))
-    # print(User.warn_ctr(member))
-    await channel.send(f"Hos geldin {member.mention} c:")
-    print(f"Hos geldin {member.mention} c:")
+    now = datetime.now()
+    guild = member.guild
+    if guild.system_channel:
+        # await guild.system_channel.send(f'Thanks for inviting me to {guild.name}')
+        channel = guild.system_channel
+    # channel = discord.utils.get(member.guild.text_channels, name="gelen-giden")
+    user = get_user(member.id)
 
+    if user:
+        await channel.send(f"Welcome again {member.mention} c: Where did you go though?.. *hmm*")
+        print(f"Hos geldin {member.mention} c:")
+    else:
+        person = Person(member.id, 1000, 0).save()
+        await channel.send(f"""Welcome {member.mention}. I've registered you. You gotta be happy c:\n**Current coin: {person.coin}, Warn counter: {person.warn_ctr}**""")
+
+    db.commit()
+    
+    
+
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def r(ctx, mentioned: discord.Member=None):
+    # now = datetime.now()
+    if mentioned:
+        a = mentioned
+    else:
+        a = ctx.author
+    
+    user = get_user(a.id)
+
+    if user:
+        await ctx.send(f"{a.name} is already registered eheh.")
+    else:
+        person = Person(a.id, 1000, 0).save()
+
+        await ctx.send(f"""As you wish my friend! I've registered {a.name}. Be happy about that c:\n**Current coin: {person.coin}, Warn counter: {person.warn_ctr}**""")
+
+    db.commit()
+
+@r.error
+async def r_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("You do not have the permission to do that!")
+
+@bot.command()
+async def q(ctx):
+    quote = quotes[randint(0, len(quotes) - 1)]
+
+    await ctx.send(quote[0])
+    if quote[1]: await ctx.send(quote[1])
+        
+    
 
 # @bot.event
 # async def on_profanity(message, word):
@@ -224,6 +267,7 @@ async def hangman(ctx, *args:str):
     author = ctx.author
     if args[0] == 'start':
         # User.add_new(author)
+
         print(author.id)
         # User.coin(author)
         game.start_game(author)
