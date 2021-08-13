@@ -2,12 +2,14 @@ import random
 import discord
 from shared import words
 # from User import User
+from databases.model import *
 
 class Hangman(object):
     hangman_words = {i: words[i] for i in range(0, len(words))}
 
     def start_game(self, user):
         self.user = user
+        self.user_ = get_user(user.id)
         self.chosen_word = ""
         self.guessed_letters = ""
         self.incorrect_letters = ["Incorrect letters: "]
@@ -20,11 +22,13 @@ class Hangman(object):
         self.guessed_letters = "_" * len(self.chosen_word)
         self.contains_guess = False
 
+        if not self.user_:
+             self.user_ = Person(self.user.id, 1000, 0).save()
+
     def get_game_status(self):
         # return a string containing the current game status and if
         # the player has won or not
         message = ""
-        # print(User.coin(self.user))
         if not self.has_ended:
             # print each letter followed by a space
             letters = ""
@@ -33,18 +37,20 @@ class Hangman(object):
             message = f'{self.remaining_guesses} guesses left \n`{letters}`'
 
         if self.has_ended and self.has_won:
-            # coin = User.coin(self.user)
-            # User.update_coin(self.user, coin + 10 * len(self.chosen_word))
+            self.user_.coin = (self.user_.coin + 10 * len(self.chosen_word))
             message += '\n **__You won! You correctly guessed__** ' + f'`{self.chosen_word}`'
 
         elif self.has_ended and not self.has_won:
-            # coin = User.coin(self.user)
-            # User.update_coin(self.user, coin - 10 * len(self.chosen_word))
+            self.user_.coin = (self.user_.coin - 10 * len(self.chosen_word))
             message += '\n **__You lost! The correct word was__** ' + f'`{self.chosen_word}`'
+        
+        self.user_.update()
+        db.commit()
 
-        # message += f"\n`You have {User.coin(self.user)} coins..`"
+        message += f"\n`You have {self.user_.coin} coins..`"
         return message
     
+
     def guess(self, message):
         args = message.split(' ')
         guess = ""
