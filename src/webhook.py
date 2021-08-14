@@ -11,7 +11,6 @@ class WebHook():
 
 
     def post(self):
-        print("self.content: ", self.content)
         data = {
         "username" : f"{self.username}",
         "avatar_url": f"{self.avatar_url}",
