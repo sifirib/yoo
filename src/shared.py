@@ -1,8 +1,12 @@
 import os
+import discord
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_DIR = os.path.join(ROOT_DIR, "databases/", "deneme.db")
 # CFG_DIR = os.path.join(ROOT_DIR, "utils/", "config.json")
 TIME_STAMP_PATTERN = "%m/%d/%Y, %H:%M:%S"
+LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+
 
 
 keycap_digits = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣"]
