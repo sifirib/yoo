@@ -1,13 +1,19 @@
 from orm import Model
 from orm import Database
 from datetime import datetime
+import os
+import psycopg2
 
+# DATABASE_URL = os.environ['DATABASE_URL']
+
+
+# conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 class Person(Model):
 
     discord_id = int
     coin = int
     warn_ctr = int
-    first_join_date = str
+    # first_join_date = str
 
 
     def __init__(self, discord_id, coin, warn_ctr):
