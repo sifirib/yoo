@@ -6,3 +6,4 @@ python-dotenv
 Pillow
 psycopg2-binary
 simple-orm
+requests
