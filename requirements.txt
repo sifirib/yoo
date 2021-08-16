@@ -5,3 +5,4 @@ youtube-search-python==1.4.5
 python-dotenv
 Pillow
 psycopg2-binary
+simple-orm
