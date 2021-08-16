@@ -163,12 +163,19 @@ async def q(ctx):
 async def on_message(message):
     global wh_obj
     global continue_
+    
+    
+    splitted_message = message.content.split()
+
 
     if message.mentions:
         mentioned = message.mentions[0]
-    if message.content.split()[0] == ".mimic":
+    else:
+        mentioned = get_userr(message.guild, splitted_message[1])
+
+    if splitted_message[0] == ".mimic":
         continue_ = True
-        if message.content.split()[1] == "stop":
+        if splitted_message[1] == "stop":
             continue_ = False
         else:
         
